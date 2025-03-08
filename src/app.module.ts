@@ -1,10 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersController } from './http/controllers/users/users.controller';
-import { UsersService } from './http/services/users/users.service';
-import { TransactionHistoryController } from './http/controllers/transaction-history/transaction-history.controller';
-import { TransactionHistoryService } from './http/services/transaction-history/transaction-history.service';
 import { UsersController } from './users/users.controller';
 import { UsersService } from './users/users.service';
 import { TransactionHistoryController } from './transaction-history/transaction-history.controller';
