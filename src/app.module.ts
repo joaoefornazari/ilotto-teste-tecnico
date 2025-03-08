@@ -5,21 +5,12 @@ import { UsersController } from './users/users.controller';
 import { UsersService } from './users/users.service';
 import { TransactionHistoryController } from './transaction-history/transaction-history.controller';
 import { TransactionHistoryService } from './transaction-history/transaction-history.service';
+import TypeORMConfig from './database/typeorm.config';
 
 @Module({
   imports: [
 		ConfigModule.forRoot({ isGlobal: true }),
-		TypeOrmModule.forRoot({
-			type: 'postgres',
-			host: process.env.DB_HOST,
-			port: Number(process.env.DB_PORT),
-			username: process.env.DB_USER,
-			password: process.env.DB_PASSWORD,
-			database: process.env.DB_NAME,
-			entities: [],
-			migrations: [],
-			synchronize: true,
-		})
+		TypeOrmModule.forRoot(TypeORMConfig)
 	],
   controllers: [UsersController, TransactionHistoryController],
   providers: [UsersService, TransactionHistoryService],
