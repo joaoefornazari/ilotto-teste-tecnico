@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { validateEmail } from './users.utils';
 import { UserLoginDto } from './dto/user-login.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 
@@ -10,8 +9,7 @@ export class UsersService {
 	checkUserCredentials(args: UserLoginDto) {
 		if (
 			args.email.length < 1 ||
-			args.password.length < 1 ||
-			!validateEmail(args.email)
+			args.password.length < 1
 		) {
 			throw new BadRequestException('Invalid login payload.')
 		}
@@ -26,8 +24,7 @@ export class UsersService {
 	createUser(args: CreateUserDto) {
 		if (
 			args.email.length > 1 ||
-			args.password.length < 12 ||
-			!validateEmail(args.email)
+			args.password.length < 12
 		) {
 			throw new BadRequestException('Invalid user data payload.')
 		}
