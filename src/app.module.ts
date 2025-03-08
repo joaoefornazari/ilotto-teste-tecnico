@@ -17,6 +17,7 @@ import { TransactionHistoryService } from './transaction-history/transaction-his
 			password: process.env.DB_PASSWORD,
 			database: process.env.DB_NAME,
 			entities: [],
+			migrations: [],
 			synchronize: true,
 		})
 	],
