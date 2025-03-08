@@ -9,21 +9,22 @@ export class CreateUsersTable1741445838742 implements MigrationInterface {
 					columns: [
 						{
 							name: 'id',
-							type: 'binary',
+							type: 'uuid',
 							isPrimary: true,
 							isGenerated: true,
 							generationStrategy: 'uuid',
-							default: `uuid_generate_v4()`
+							default: 'uuid_generate_v4()',
 						},
 						{
 							name: 'email',
-							type: 'string',
+							type: 'varchar',
+							length: '300',
 							isNullable: false,
 							isUnique: true,
 						},
 						{
 							name: 'password',
-							type: 'string',
+							type: 'varchar',
 							length: '600',
 							isNullable: false,
 						},
@@ -44,7 +45,8 @@ export class CreateUsersTable1741445838742 implements MigrationInterface {
 						{
 							name: 'updated_at',
 							type: 'timestamp',
-							default: `NOW()`
+							default: `NOW()`,
+							isNullable: true,
 						},
 					]
 				})
@@ -52,7 +54,7 @@ export class CreateUsersTable1741445838742 implements MigrationInterface {
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-			await queryRunner.dropTable('users', true)
+			await queryRunner.dropTable('users', true);
     }
 
 }

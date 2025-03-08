@@ -12,7 +12,7 @@ export class CreateTransactionHistoryTable1741447640490 implements MigrationInte
 							type: 'uuid',
 							isPrimary: true,
 							generationStrategy: 'uuid',
-							default: `uuid_generate_v4()`
+							default: 'uuid_generate_v4()'
 						},
 						{
 							name: 'userInitiatorId',
