@@ -1,69 +1,108 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { TransactionDto } from './dto/transaction.dto';
 import { TransferDto } from './dto/transfer.dto';
 import { validateValue } from './transaction-history.utils';
 import { TransactionHistoryDto } from './dto/transaction-history.dto';
+import { DataSource, Repository } from 'typeorm';
+import { TransactionHistory } from './transaction-history.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import TransactionOperationContext from './context/transaction-operation.context';
+import TransactionDeposit from './context/transaction-deposit.strategy';
+import TransactionWithdraw from './context/transaction-withdraw.strategy';
 
 @Injectable()
 export class TransactionHistoryService {
-	constructor() {}
+	constructor(
+		private dataSource: DataSource,
+
+		@InjectRepository(TransactionHistory)
+		private transactionRepository: Repository<TransactionHistory>
+	) {}
 
 	// ENVOLVA TUDO EM SQL TRANSACTIONS PRA PODER DAR ROLLBACK!
 
-	addMoney(args: TransactionDto) {
+	async addMoney(args: TransactionDto) {
 		if (!validateValue(args.value)) {
 			throw new BadRequestException('Invalid deposit payload.')
 		}
 
-		this.registerTransaction({
-			userInitiatorId: '', // will come from jwt
-			userRecipientId: '', // same as initiator
-			value: args.value
-		})
+		// mock
+		const userId = "b3e12c76-f3d5-4286-80c0-31f232f29a4b"
+		
+		TransactionOperationContext.setStrategy(new TransactionDeposit(this.dataSource, userId))
+		TransactionOperationContext.executeStrategy(args.value)
 
-		// Model will be here
+		this.registerTransaction({
+			userInitiatorId: userId, // will come from jwt
+			userRecipientId: userId, // same as initiator
+			value: args.value,
+			type: 'D'
+		})
 
 		return 'Success'
 	}
 
 	// ENVOLVA TUDO EM SQL TRANSACTIONS PRA PODER DAR ROLLBACK!
 
-	subtractMoney(args: TransactionDto) {
+	async subtractMoney(args: TransactionDto) {
 		if (!validateValue(args.value)) {
-			throw new BadRequestException('Invalid deposit payload.')
+			throw new BadRequestException('Invalid withdrawal payload.')
 		}
 
-		// Model will be here
+		// mock
+		const userId = "b3e12c76-f3d5-4286-80c0-31f232f29a4b"
+
+		TransactionOperationContext.setStrategy(new TransactionWithdraw(this.dataSource, userId))
+		await TransactionOperationContext.executeStrategy(args.value)
 
 		this.registerTransaction({
-			userInitiatorId: '', // will come from jwt
-			userRecipientId: '', // same as initiator
-			value: args.value
+			userInitiatorId: userId, // will come from jwt
+			userRecipientId: userId, // same as initiator
+			value: args.value,
+			type: 'W'
 		})
 
-		return ''
+		return 'Success'
 	}
 
 	// ENVOLVA TUDO EM SQL TRANSACTIONS PRA PODER DAR ROLLBACK!
 
-	transferMoney(args: TransferDto) {
+	async transferMoney(args: TransferDto) {
 		if (!validateValue(args.value)) {
-			throw new BadRequestException('Invalid deposit payload.')
+			throw new BadRequestException('Invalid transfer payload.')
 		}
 
-		// Model will be here
+		// mock
+		const userId = "b3e12c76-f3d5-4286-80c0-31f232f29a4b"
+
+		TransactionOperationContext.setStrategy(new TransactionWithdraw(this.dataSource, userId))
+		await TransactionOperationContext.executeStrategy(args.value)
+
+		TransactionOperationContext.setStrategy(new TransactionDeposit(this.dataSource, args.userReceiverId))
+		await TransactionOperationContext.executeStrategy(args.value)
 
 		this.registerTransaction({
-			userInitiatorId: '', // will come from jwt
+			userInitiatorId: userId, // will come from jwt
 			userRecipientId: args.userReceiverId,
-			value: args.value
+			value: args.value,
+			type: 'T'
 		})
 
-		return ''
+		return 'Success'
 	}
 
 	registerTransaction(payload: TransactionHistoryDto) {
-		// Model will be here
+		try {
+			const transaction = new TransactionHistory()
+			transaction.type = payload.type
+			transaction.userInitiatorId = payload.userInitiatorId
+			transaction.userInitiatorId = payload.userRecipientId
+			transaction.value = payload.value
+
+			this.transactionRepository.save(transaction)
+		} catch (error) {
+			throw new InternalServerErrorException('Error on transaction.')
+		}
 
 		return ''
 	}
