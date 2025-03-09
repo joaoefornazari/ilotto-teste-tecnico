@@ -9,15 +9,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import TransactionOperationContext from './context/transaction-operation.context';
 import TransactionDeposit from './context/transaction-deposit.strategy';
 import TransactionWithdraw from './context/transaction-withdraw.strategy';
+import DataSourceObject from 'src/database/datasource';
+import DataSourceSingleton from 'src/database/datasource';
 
 @Injectable()
 export class TransactionHistoryService {
-	constructor(
-		private dataSource: DataSource,
+	private dataSource: DataSource
 
+	constructor(
 		@InjectRepository(TransactionHistory)
 		private transactionRepository: Repository<TransactionHistory>
-	) {}
+	) {
+		this.dataSource = DataSourceSingleton.get()
+	}
 
 	// ENVOLVA TUDO EM SQL TRANSACTIONS PRA PODER DAR ROLLBACK!
 
