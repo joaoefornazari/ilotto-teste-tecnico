@@ -27,7 +27,8 @@ export class UsersService {
 		}
 
 		try {
-			await compare(user.password, args.password)
+			const check = await compare(args.password, user.password)
+			if (!check) throw new Error()
 		} catch (error) {
 			throw new UnauthorizedException('Invalid login payload.')
 		}
@@ -37,14 +38,16 @@ export class UsersService {
 
 	async createUser(args: CreateUserDto): Promise<User> {
 		if (
-			args.email.length > 1 ||
+			args.email.length < 1 ||
 			args.password.length < 12
 		) {
 			throw new BadRequestException('Invalid user data payload.')
 		}
 
 		try {
-			return this.userRepository.create(args)
+			const user = this.userRepository.create(args)
+			await this.userRepository.save(user)
+			return user
 		} catch (error) {
 			throw new Error(`Error while creating user: ${error?.message ?? error}`)
 		}
