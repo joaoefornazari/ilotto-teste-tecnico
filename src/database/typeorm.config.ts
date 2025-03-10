@@ -7,8 +7,8 @@ const TypeORMConfig = {
 	username: process.env.DB_USER ?? 'postgres',
 	password: process.env.DB_PASSWORD ?? 'root',
 	database: process.env.DB_NAME ?? 'test',
-	entities: ["dist/**/**.entity.js"],
-	migrations: ["dist/database/migrations/**{.js}"],
+	entities: ["dist/**/**.entity{.ts,.js}"],
+	migrations: ["dist/database/migrations/**{.ts,.js}"],
 	synchronize: true,
 } satisfies TypeOrmModuleOptions
 
