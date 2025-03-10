@@ -6,8 +6,8 @@ const SALT_ROUNDS = 10
 
 @Entity('users')
 export class User {
-	@PrimaryGeneratedColumn()
 	@IsUUID()
+	@PrimaryGeneratedColumn('uuid')
 	id: string
 
 	@Column()
@@ -25,5 +25,5 @@ export class User {
 
 	@Column()
 	@IsNumber()
-	balance: number
+	balance: number = 0.00
 }
