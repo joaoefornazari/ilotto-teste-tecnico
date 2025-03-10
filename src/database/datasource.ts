@@ -15,10 +15,11 @@ class DataSourceSingleton {
 		}
 		return DataSourceSingleton.instance
 	}
-
+	
 	get (): DataSource {
 		return this.dataSource
 	}
 }
 
-export default DataSourceSingleton.getInstance()
+export const getDataSourceInstance = () => DataSourceSingleton.getInstance()
+export default new DataSource(TypeORMConfig)
