@@ -9,8 +9,8 @@ import TypeORMConfig from './database/typeorm.config';
   imports: [
 		ConfigModule.forRoot({ isGlobal: true }),
 		TypeOrmModule.forRoot(TypeORMConfig),
-		// UsersModule,
-		// TransactionHistoryModule,
+		UsersModule,
+		TransactionHistoryModule,
 	],
 })
 export class AppModule {}
