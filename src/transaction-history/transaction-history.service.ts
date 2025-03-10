@@ -9,8 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import TransactionOperationContext from './context/transaction-operation.context';
 import TransactionDeposit from './context/transaction-deposit.strategy';
 import TransactionWithdraw from './context/transaction-withdraw.strategy';
-import DataSourceObject from 'src/database/datasource';
-import DataSourceSingleton from 'src/database/datasource';
+import { getDataSourceInstance } from 'src/database/datasource';
 
 @Injectable()
 export class TransactionHistoryService {
@@ -20,10 +19,8 @@ export class TransactionHistoryService {
 		@InjectRepository(TransactionHistory)
 		private transactionRepository: Repository<TransactionHistory>
 	) {
-		this.dataSource = DataSourceSingleton.get()
+		this.dataSource = getDataSourceInstance().get()
 	}
-
-	// ENVOLVA TUDO EM SQL TRANSACTIONS PRA PODER DAR ROLLBACK!
 
 	async addMoney(args: TransactionDto) {
 		if (!validateValue(args.value)) {
@@ -46,8 +43,6 @@ export class TransactionHistoryService {
 		return 'Success'
 	}
 
-	// ENVOLVA TUDO EM SQL TRANSACTIONS PRA PODER DAR ROLLBACK!
-
 	async subtractMoney(args: TransactionDto) {
 		if (!validateValue(args.value)) {
 			throw new BadRequestException('Invalid withdrawal payload.')
@@ -68,8 +63,6 @@ export class TransactionHistoryService {
 
 		return 'Success'
 	}
-
-	// ENVOLVA TUDO EM SQL TRANSACTIONS PRA PODER DAR ROLLBACK!
 
 	async transferMoney(args: TransferDto) {
 		if (!validateValue(args.value)) {
