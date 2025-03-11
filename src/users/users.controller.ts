@@ -20,7 +20,6 @@ export class UsersController {
 	@ApiResponse(generateDocs('sign-in', HttpStatus.INTERNAL_SERVER_ERROR))
 	@Post('sign-in')
 	signIn(@Body() userLoginDto: UserLoginDto): Promise<{token: string}> {
-		console.log(generateDocs('sign-in', HttpStatus.CREATED))
 		return this.usersService.checkUserCredentials(userLoginDto)
 	}
 
