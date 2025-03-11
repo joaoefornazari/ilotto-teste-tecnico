@@ -1,9 +1,17 @@
-import { IsString, IsNumber } from "class-validator";
+import { IsNumber, IsUUID } from "class-validator";
 
 export class TransactionDto {
+	/**
+	 * Valor referente à transação.
+	 * @example 20.00
+	 */
 	@IsNumber()
 	value: number
 
-	@IsString()
+	/**
+	 * ID do usuário que está realizando a transação.
+	 * @example uuid-random-value-string
+	 */
+	@IsUUID()
 	userId: string
 }
