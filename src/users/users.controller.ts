@@ -25,9 +25,9 @@ export class UsersController {
 	}
 
 	/**
-	 * Faz login do usuário.
+	 * Cria um novo usuário.
 	 *  
-	 * @remarks Permite que o usuário faça login com email e senha.
+	 * @remarks Cria um novo usuário com nome, email e senha.
 	 */
 	@ApiResponse(generateDocs('sign-up', HttpStatus.CREATED))
 	@ApiResponse(generateDocs('sign-up', HttpStatus.BAD_REQUEST))
