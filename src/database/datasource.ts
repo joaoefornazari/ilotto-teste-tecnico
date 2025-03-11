@@ -1,25 +1,6 @@
 import { DataSource } from "typeorm"
 import TypeORMConfig from "./typeorm.config"
 
-class DataSourceSingleton {
-	private static instance: DataSourceSingleton
-	private dataSource: DataSource
+const DS =  new DataSource(TypeORMConfig)
 
-	private constructor() {
-		this.dataSource = new DataSource(TypeORMConfig)
-	}
-
-	static getInstance(): DataSourceSingleton {
-		if (!DataSourceSingleton.instance) {
-			DataSourceSingleton.instance = new DataSourceSingleton()
-		}
-		return DataSourceSingleton.instance
-	}
-	
-	get (): DataSource {
-		return this.dataSource
-	}
-}
-
-export const getDataSourceInstance = () => DataSourceSingleton.getInstance()
-export default new DataSource(TypeORMConfig)
+export default DS
