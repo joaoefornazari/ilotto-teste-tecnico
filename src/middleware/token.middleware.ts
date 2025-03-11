@@ -24,12 +24,7 @@ export class TokenMiddleware implements NestMiddleware {
 
 			verify(auth.token, secret, (error, decoded) => {
 				if (error) throw new Error('Authentication error.')
-
-				if (req.route === '/transactions/withdraw') {
-					req.query.userId = decoded
-				} else {
-					req.body.userId = decoded
-				}
+				req.body.userId = decoded
 				next()
 			})
 		} catch (error) {
