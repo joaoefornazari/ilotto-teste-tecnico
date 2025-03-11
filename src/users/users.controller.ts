@@ -24,6 +24,14 @@ export class UsersController {
 		return this.usersService.checkUserCredentials(userLoginDto)
 	}
 
+	/**
+	 * Faz login do usuário.
+	 *  
+	 * @remarks Permite que o usuário faça login com email e senha.
+	 */
+	@ApiResponse(generateDocs('sign-up', HttpStatus.CREATED))
+	@ApiResponse(generateDocs('sign-up', HttpStatus.BAD_REQUEST))
+	@ApiResponse(generateDocs('sign-up', HttpStatus.INTERNAL_SERVER_ERROR))
 	@Post('sign-up')
 	@HttpCode(HttpStatus.CREATED)
 	signUp(@Body() createUserDto: CreateUserDto) {
