@@ -1,4 +1,6 @@
 import { DataSource } from "typeorm"
 import TypeORMConfig from "./typeorm.config"
 
-export default new DataSource(TypeORMConfig)
+const DS =  new DataSource(TypeORMConfig)
+
+export default DS
