@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { TransactionDto } from './dto/transaction.dto';
 import { TransferDto } from './dto/transfer.dto';
 import { validateValue } from './transaction-history.utils';
@@ -9,29 +9,32 @@ import { InjectRepository } from '@nestjs/typeorm';
 import TransactionOperationContext from './context/transaction-operation.context';
 import TransactionDeposit from './context/transaction-deposit.strategy';
 import TransactionWithdraw from './context/transaction-withdraw.strategy';
-import { getDataSourceInstance } from 'src/database/datasource';
 
 @Injectable()
 export class TransactionHistoryService {
-	private dataSource: DataSource
-
 	constructor(
 		@InjectRepository(TransactionHistory)
-		private transactionRepository: Repository<TransactionHistory>
+		private transactionRepository: Repository<TransactionHistory>,
+
+		@Inject(DataSource)
+		private dataSource: DataSource
 	) {
-		this.dataSource = getDataSourceInstance().get()
 	}
 
 	async addMoney(args: TransactionDto) {
 		if (!validateValue(args.value)) {
 			throw new BadRequestException('Invalid deposit payload.')
 		}
-
-		// mock
-		const userId = "b3e12c76-f3d5-4286-80c0-31f232f29a4b"
 		
-		TransactionOperationContext.setStrategy(new TransactionDeposit(this.dataSource, userId))
-		TransactionOperationContext.executeStrategy(args.value)
+		// mock
+		const userId = "e2a8ff01-9d19-4eee-9728-ae1b6f40fa7b"
+		
+		try {
+			TransactionOperationContext.setStrategy(new TransactionDeposit(this.dataSource, userId))
+			await TransactionOperationContext.executeStrategy(args.value)
+		} catch (error) {
+			throw new Error(`Unable to finish transaction: ${error}`)
+		}
 
 		this.registerTransaction({
 			userInitiatorId: userId, // will come from jwt
@@ -49,15 +52,19 @@ export class TransactionHistoryService {
 		}
 
 		// mock
-		const userId = "b3e12c76-f3d5-4286-80c0-31f232f29a4b"
+		const userId = "e2a8ff01-9d19-4eee-9728-ae1b6f40fa7b"
 
-		TransactionOperationContext.setStrategy(new TransactionWithdraw(this.dataSource, userId))
-		await TransactionOperationContext.executeStrategy(args.value)
+		try {
+			TransactionOperationContext.setStrategy(new TransactionWithdraw(this.dataSource, userId))
+			await TransactionOperationContext.executeStrategy(args.value)
+		} catch (error) {
+			throw new Error(`Unable to finish transaction: ${error}`)
+		}
 
 		this.registerTransaction({
 			userInitiatorId: userId, // will come from jwt
 			userRecipientId: userId, // same as initiator
-			value: args.value,
+			value: Number(args.value),
 			type: 'W'
 		})
 
@@ -70,13 +77,21 @@ export class TransactionHistoryService {
 		}
 
 		// mock
-		const userId = "b3e12c76-f3d5-4286-80c0-31f232f29a4b"
+		const userId = "e2a8ff01-9d19-4eee-9728-ae1b6f40fa7b"
 
-		TransactionOperationContext.setStrategy(new TransactionWithdraw(this.dataSource, userId))
-		await TransactionOperationContext.executeStrategy(args.value)
+		try {
+			TransactionOperationContext.setStrategy(new TransactionWithdraw(this.dataSource, userId))
+			await TransactionOperationContext.executeStrategy(args.value)
+		} catch (error) {
+			throw new Error(`Unable to finish transaction: ${error}`)
+		}
 
-		TransactionOperationContext.setStrategy(new TransactionDeposit(this.dataSource, args.userReceiverId))
-		await TransactionOperationContext.executeStrategy(args.value)
+		try {
+			TransactionOperationContext.setStrategy(new TransactionDeposit(this.dataSource, args.userReceiverId))
+			await TransactionOperationContext.executeStrategy(args.value)
+		} catch (error) {
+			throw new Error(`Unable to finish transaction: OOPS ${error}`)
+		}
 
 		this.registerTransaction({
 			userInitiatorId: userId, // will come from jwt
@@ -93,7 +108,7 @@ export class TransactionHistoryService {
 			const transaction = new TransactionHistory()
 			transaction.type = payload.type
 			transaction.userInitiatorId = payload.userInitiatorId
-			transaction.userInitiatorId = payload.userRecipientId
+			transaction.userRecipientId = payload.userRecipientId
 			transaction.value = payload.value
 
 			this.transactionRepository.save(transaction)
