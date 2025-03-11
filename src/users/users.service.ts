@@ -37,7 +37,7 @@ export class UsersService {
 		const secret = <string>process.env.SECRET_TOKEN
 		if (!secret) throw new InternalServerErrorException()
 		
-		const token = sign({ id: user.id }, secret)
+		const token = sign(user.id, secret)
 		return { token }
 	}
 
