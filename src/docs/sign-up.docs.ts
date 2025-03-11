@@ -27,7 +27,9 @@ const description = {
 export default (status: 201 | 400 | 500) => {
 	return {
 		status: status,
-		schema: schema[status],
+		schema: {
+			example: schema[status]
+		},
 		description: description[status]
 	}
 }

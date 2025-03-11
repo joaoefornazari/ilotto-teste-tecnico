@@ -1,9 +1,7 @@
 import { HttpStatus } from "@nestjs/common";
 
 const schema = {
-	[HttpStatus.OK]: {
-		message: 'Success'
-	},
+	[HttpStatus.OK]: "Success",
 	[HttpStatus.BAD_REQUEST]: {
 		message: "Invalid transfer payload.",
 		error: "Bad Request",
@@ -24,7 +22,9 @@ const description = {
 export default (status: 200 | 400 | 500) => {
 	return {
 		status: status,
-		schema: schema[status],
+		schema: {
+			example: schema[status]
+		},
 		description: description[status]
 	}
 }
