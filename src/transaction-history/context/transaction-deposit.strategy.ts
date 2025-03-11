@@ -10,7 +10,7 @@ class TransactionDeposit implements TransactionOperationStrategy {
 	
 	async execute(value: number) {
 		const queryRunner = this.dataSource.createQueryRunner()
-		try {	
+		try {
 			await queryRunner.connect()
 		} catch (error) {
 			queryRunner.release()
@@ -20,11 +20,11 @@ class TransactionDeposit implements TransactionOperationStrategy {
 		await queryRunner.startTransaction()
 
 		try {
-			await queryRunner.query('UPDATE users SET balance = balance + ? WHERE id = ?', [value, this.userId])
+			await queryRunner.query(`UPDATE users SET balance = balance + ${value} WHERE id = '${this.userId}';`)
 			await queryRunner.commitTransaction()
 		} catch (error) {
 			await queryRunner.rollbackTransaction()
-			throw new InternalServerErrorException('Database error.')
+			throw new InternalServerErrorException(`Database error: ${error}`)
 		} finally {
 			queryRunner.release()
 		}
