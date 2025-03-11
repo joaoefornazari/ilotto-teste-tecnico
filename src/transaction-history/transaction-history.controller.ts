@@ -3,22 +3,22 @@ import { TransactionHistoryService } from './transaction-history.service';
 import { TransactionDto } from './dto/transaction.dto';
 import { TransferDto } from './dto/transfer.dto';
 
-@Controller('transaction-history')
+@Controller('transactions')
 export class TransactionHistoryController {
 	constructor(private transactionService: TransactionHistoryService) {}
 
 	@Post('deposit')
-	deposit(@Body() depositDto: TransactionDto) {
-		return this.transactionService.subtractMoney(depositDto)
+	async deposit(@Body() depositDto: TransactionDto) {
+		return await this.transactionService.addMoney(depositDto)
 	}
 
 	@Get('withdraw')
-	withdraw(@Query() withdrawDto: TransactionDto) {
-		return this.transactionService.subtractMoney(withdrawDto)
+	async withdraw(@Query() withdrawDto: TransactionDto) {
+		return await this.transactionService.subtractMoney(withdrawDto)
 	}
 
 	@Post('transfer')
-	transfer(@Body() transferDto: TransferDto) {
-		return this.transactionService.transferMoney(transferDto)
+	async transfer(@Body() transferDto: TransferDto) {
+		return await this.transactionService.transferMoney(transferDto)
 	}
 }
