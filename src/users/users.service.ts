@@ -1,10 +1,11 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { UserLoginDto } from './dto/user-login.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './users.entity';
 import { Repository } from 'typeorm';
 import { compare } from 'bcrypt';
+import { sign } from 'jsonwebtoken';
 
 @Injectable()
 export class UsersService {
@@ -33,7 +34,11 @@ export class UsersService {
 			throw new UnauthorizedException('Invalid login payload.')
 		}
 
-		return "Success" // retornarei a token aqui logo logo.
+		const secret = <string>process.env.SECRET_TOKEN
+		if (!secret) throw new InternalServerErrorException()
+		
+		const token = sign({ id: user.id }, secret)
+		return { token }
 	}
 
 	async createUser(args: CreateUserDto): Promise<User> {
