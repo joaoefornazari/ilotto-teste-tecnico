@@ -1,11 +1,11 @@
-import { IsUUID } from "class-validator";
+import { IsDecimal, IsUUID } from "class-validator";
 import { User } from "src/users/users.entity";
 import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('transaction_history')
 export class TransactionHistory {
-	@PrimaryGeneratedColumn()
 	@IsUUID()
+	@PrimaryGeneratedColumn('uuid')
 	id: string
 
 	@Column()
@@ -19,6 +19,7 @@ export class TransactionHistory {
 	userRecipientId: string 
 
 	@Column()
+	@IsDecimal()
 	value: number
 
 	@Column()
