@@ -9,7 +9,6 @@ async function bootstrap() {
 		.setTitle('iLotto Teste Técnico - API')
 		.setDescription('Documentação da API desenvolvida para o teste técnico da iLotto.')
 		.setVersion('1.0')
-		.addTag('ilotto')
 		.build()
 
 	const documentFactory = () => SwaggerModule.createDocument(app, config)
