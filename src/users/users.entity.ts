@@ -1,4 +1,4 @@
-import { IsEmail, IsNumber, IsStrongPassword, IsUUID } from "class-validator"
+import { IsEmail, IsDecimal, IsStrongPassword, IsUUID } from "class-validator"
 import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from "typeorm"
 import { hash } from "bcrypt"
 
@@ -24,6 +24,6 @@ export class User {
 	}
 
 	@Column()
-	@IsNumber()
+	@IsDecimal()
 	balance: number = 0.00
 }
