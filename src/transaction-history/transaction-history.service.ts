@@ -26,19 +26,16 @@ export class TransactionHistoryService {
 			throw new BadRequestException('Invalid deposit payload.')
 		}
 		
-		// mock
-		const userId = "e2a8ff01-9d19-4eee-9728-ae1b6f40fa7b"
-		
 		try {
-			TransactionOperationContext.setStrategy(new TransactionDeposit(this.dataSource, userId))
+			TransactionOperationContext.setStrategy(new TransactionDeposit(this.dataSource, args.userId))
 			await TransactionOperationContext.executeStrategy(args.value)
 		} catch (error) {
 			throw new Error(`Unable to finish transaction: ${error}`)
 		}
 
 		this.registerTransaction({
-			userInitiatorId: userId, // will come from jwt
-			userRecipientId: userId, // same as initiator
+			userInitiatorId: args.userId,
+			userRecipientId: args.userId,
 			value: args.value,
 			type: 'D'
 		})
@@ -51,19 +48,16 @@ export class TransactionHistoryService {
 			throw new BadRequestException('Invalid withdrawal payload.')
 		}
 
-		// mock
-		const userId = "e2a8ff01-9d19-4eee-9728-ae1b6f40fa7b"
-
 		try {
-			TransactionOperationContext.setStrategy(new TransactionWithdraw(this.dataSource, userId))
+			TransactionOperationContext.setStrategy(new TransactionWithdraw(this.dataSource, args.userId))
 			await TransactionOperationContext.executeStrategy(args.value)
 		} catch (error) {
 			throw new Error(`Unable to finish transaction: ${error}`)
 		}
 
 		this.registerTransaction({
-			userInitiatorId: userId, // will come from jwt
-			userRecipientId: userId, // same as initiator
+			userInitiatorId: args.userId, // will come from jwt
+			userRecipientId: args.userId, // same as initiator
 			value: Number(args.value),
 			type: 'W'
 		})
@@ -76,11 +70,8 @@ export class TransactionHistoryService {
 			throw new BadRequestException('Invalid transfer payload.')
 		}
 
-		// mock
-		const userId = "e2a8ff01-9d19-4eee-9728-ae1b6f40fa7b"
-
 		try {
-			TransactionOperationContext.setStrategy(new TransactionWithdraw(this.dataSource, userId))
+			TransactionOperationContext.setStrategy(new TransactionWithdraw(this.dataSource, args.userId))
 			await TransactionOperationContext.executeStrategy(args.value)
 		} catch (error) {
 			throw new Error(`Unable to finish transaction: ${error}`)
@@ -94,7 +85,7 @@ export class TransactionHistoryService {
 		}
 
 		this.registerTransaction({
-			userInitiatorId: userId, // will come from jwt
+			userInitiatorId: args.userId, // will come from jwt
 			userRecipientId: args.userReceiverId,
 			value: args.value,
 			type: 'T'
