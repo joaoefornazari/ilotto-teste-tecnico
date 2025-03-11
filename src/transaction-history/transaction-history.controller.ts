@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { TransactionHistoryService } from './transaction-history.service';
 import { TransactionDto } from './dto/transaction.dto';
 import { TransferDto } from './dto/transfer.dto';
@@ -12,8 +12,8 @@ export class TransactionHistoryController {
 		return await this.transactionService.addMoney(depositDto)
 	}
 
-	@Get('withdraw')
-	async withdraw(@Query() withdrawDto: TransactionDto) {
+	@Post('withdraw')
+	async withdraw(@Body() withdrawDto: TransactionDto) {
 		return await this.transactionService.subtractMoney(withdrawDto)
 	}
 
