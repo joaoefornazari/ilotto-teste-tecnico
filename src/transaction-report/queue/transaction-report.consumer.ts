@@ -4,7 +4,7 @@ import { TransactionReport } from "../transaction-report.entity";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 
-@Processor('transaction-history-queue')
+@Processor('transaction-report-queue')
 export class TransactionReportConsumer extends WorkerHost {
 
 	constructor(
@@ -17,7 +17,7 @@ export class TransactionReportConsumer extends WorkerHost {
 	@OnWorkerEvent('active')
 	onActive(job: Job) {
 		console.log(
-			`Processing job ${job.id} of type ${job.name}...`,
+			`Processing job ${job.id} of type ${job.name} report...`,
 		);
 	}
 
