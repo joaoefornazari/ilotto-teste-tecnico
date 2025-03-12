@@ -75,10 +75,16 @@ export class TransactionHistoryService {
 		}
 
 		try {
-			TransactionOperationContext.setStrategy(new TransactionWithdraw(this.dataSource, args.userId))
-			await TransactionOperationContext.executeStrategy(args.value)
+			await this.transactionQueue.add(
+				'withdraw',
+				{
+					userId: args.userId,
+					value: args.value
+				},
+				{ jobId: randomUUID() }
+			)
 		} catch (error) {
-			throw new Error(`Unable to finish transaction: ${error}`)
+			throw new Error(`Unable to queue transaction: ${error}`)
 		}
 
 		await this.registerTransaction({
@@ -87,6 +93,17 @@ export class TransactionHistoryService {
 			value: Number(args.value),
 			type: 'W'
 		})
+
+		// aumenta saques realizados no dia atual
+
+		await this.transactionReportQueue.add(
+			'update',
+			{
+				date: getCurrentYearMonthDateString(new Date()),
+				type: 'W'
+			},
+			{ jobId: randomUUID() }
+		)
 
 		return 'Success'
 	}
