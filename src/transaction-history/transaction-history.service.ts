@@ -1,23 +1,30 @@
 import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { TransactionDto } from './dto/transaction.dto';
 import { TransferDto } from './dto/transfer.dto';
-import { validateValue } from './transaction-history.utils';
+import { getCurrentYearMonthDateString, validateValue } from './transaction-history.utils';
 import { TransactionHistoryDto } from './dto/transaction-history.dto';
 import { DataSource, Repository } from 'typeorm';
-import { TransactionHistory } from './transaction-history.entity';
-import { InjectRepository } from '@nestjs/typeorm';
 import TransactionOperationContext from './context/transaction-operation.context';
 import TransactionDeposit from './context/transaction-deposit.strategy';
 import TransactionWithdraw from './context/transaction-withdraw.strategy';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class TransactionHistoryService {
 	constructor(
-		@InjectRepository(TransactionHistory)
-		private transactionRepository: Repository<TransactionHistory>,
-
 		@Inject(DataSource)
-		private dataSource: DataSource
+		private dataSource: DataSource,
+
+		@InjectQueue('transaction-queue')
+		private transactionQueue: Queue,
+
+		@InjectQueue('transaction-history-queue')
+		private transactionHistoryQueue: Queue,
+
+		@InjectQueue('transaction-report-queue')
+		private transactionReportQueue: Queue
 	) {
 	}
 
@@ -26,19 +33,38 @@ export class TransactionHistoryService {
 			throw new BadRequestException('Invalid deposit payload.')
 		}
 		
-		try {
-			TransactionOperationContext.setStrategy(new TransactionDeposit(this.dataSource, args.userId))
-			await TransactionOperationContext.executeStrategy(args.value)
+		try {			
+			await this.transactionQueue.add(
+				'deposit', 
+				{
+					userId: args.userId,
+					value: args.value
+				},
+				{ jobId: randomUUID() }
+			)
 		} catch (error) {
-			throw new Error(`Unable to finish transaction: ${error}`)
+			throw new Error(`Unable to queue transaction: ${error}`)
 		}
 
-		this.registerTransaction({
+		// registra transação no histórico
+
+		await this.registerTransaction({
 			userInitiatorId: args.userId,
 			userRecipientId: args.userId,
 			value: args.value,
 			type: 'D'
 		})
+
+		// aumenta depósitos realizados no dia atual
+
+		await this.transactionReportQueue.add(
+			'update',
+			{
+				date: getCurrentYearMonthDateString(new Date()),
+				type: 'D'
+			},
+			{ jobId: randomUUID() }
+		)
 
 		return 'Success'
 	}
@@ -55,9 +81,9 @@ export class TransactionHistoryService {
 			throw new Error(`Unable to finish transaction: ${error}`)
 		}
 
-		this.registerTransaction({
-			userInitiatorId: args.userId, // will come from jwt
-			userRecipientId: args.userId, // same as initiator
+		await this.registerTransaction({
+			userInitiatorId: args.userId,
+			userRecipientId: args.userId,
 			value: Number(args.value),
 			type: 'W'
 		})
@@ -84,7 +110,7 @@ export class TransactionHistoryService {
 			throw new Error(`Unable to finish transaction: OOPS ${error}`)
 		}
 
-		this.registerTransaction({
+		await this.registerTransaction({
 			userInitiatorId: args.userId, // will come from jwt
 			userRecipientId: args.userReceiverId,
 			value: args.value,
@@ -94,17 +120,15 @@ export class TransactionHistoryService {
 		return 'Success'
 	}
 
-	registerTransaction(payload: TransactionHistoryDto) {
+	async registerTransaction(payload: TransactionHistoryDto) {
 		try {
-			const transaction = new TransactionHistory()
-			transaction.type = payload.type
-			transaction.userInitiatorId = payload.userInitiatorId
-			transaction.userRecipientId = payload.userRecipientId
-			transaction.value = payload.value
-
-			this.transactionRepository.save(transaction)
+			await this.transactionHistoryQueue.add(
+				'register',
+				payload,
+				{ jobId: randomUUID() }
+			)
 		} catch (error) {
-			throw new InternalServerErrorException('Error on transaction.')
+			throw new InternalServerErrorException(`Error on queueing transaction: ${error}`)
 		}
 
 		return ''
