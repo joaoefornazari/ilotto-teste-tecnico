@@ -114,25 +114,48 @@ export class TransactionHistoryService {
 		}
 
 		try {
-			TransactionOperationContext.setStrategy(new TransactionWithdraw(this.dataSource, args.userId))
-			await TransactionOperationContext.executeStrategy(args.value)
+			await this.transactionQueue.add(
+				'withdraw',
+				{
+					userId: args.userId,
+					value: args.value
+				},
+				{ jobId: randomUUID() }
+			)
 		} catch (error) {
-			throw new Error(`Unable to finish transaction: ${error}`)
+			throw new Error(`Unable to queue transaction: ${error}`)
 		}
 
 		try {
-			TransactionOperationContext.setStrategy(new TransactionDeposit(this.dataSource, args.userReceiverId))
-			await TransactionOperationContext.executeStrategy(args.value)
+			await this.transactionQueue.add(
+				'deposit',
+				{
+					userId: args.userReceiverId,
+					value: args.value
+				},
+				{ jobId: randomUUID() }
+			)
 		} catch (error) {
-			throw new Error(`Unable to finish transaction: OOPS ${error}`)
+			throw new Error(`Unable to queue transaction: ${error}`)
 		}
 
 		await this.registerTransaction({
-			userInitiatorId: args.userId, // will come from jwt
+			userInitiatorId: args.userId,
 			userRecipientId: args.userReceiverId,
 			value: args.value,
 			type: 'T'
 		})
+
+		// aumenta transferências realizadas no dia atual
+
+		await this.transactionReportQueue.add(
+			'update',
+			{
+				date: getCurrentYearMonthDateString(new Date()),
+				type: 'T'
+			},
+			{ jobId: randomUUID() }
+		)
 
 		return 'Success'
 	}
