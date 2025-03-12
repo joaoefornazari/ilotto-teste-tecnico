@@ -5,7 +5,7 @@ import { TransactionHistory } from "src/transaction-history/transaction-history.
 import { TransactionHistoryService } from "./transaction-history.service";
 import { BullModule } from "@nestjs/bullmq";
 import { TransactionConsumer } from "./queue/transaction.consumer";
-import { TransactionReportConsumer } from "src/transaction-report/queue/transaction-report.consume";
+import { TransactionReportConsumer } from "src/transaction-report/queue/transaction-report.consumer";
 import { TransactionHistoryConsumer } from "./queue/transaction-history.consumer";
 
 @Module({
