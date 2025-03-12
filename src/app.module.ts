@@ -5,6 +5,7 @@ import { UsersModule } from './users/users.module';
 import { TransactionHistoryModule } from './transaction-history/transaction-history.module';
 import { TokenMiddleware } from './middleware/token.middleware';
 import { TransactionHistoryController } from './transaction-history/transaction-history.controller';
+import { BullModule } from '@nestjs/bullmq'
 import TypeORMConfig from './database/typeorm.config';
 
 @Module({
@@ -13,6 +14,12 @@ import TypeORMConfig from './database/typeorm.config';
 		TypeOrmModule.forRoot(TypeORMConfig),
 		UsersModule,
 		TransactionHistoryModule,
+		BullModule.forRoot({
+			connection: {
+				host: process.env.REDIS_HOST ?? 'localhost',
+				port: Number(process.env.REDIS_PORT) ?? 6379,
+			}
+		}),
 	],
 })
 export class AppModule implements NestModule {
@@ -20,5 +27,8 @@ export class AppModule implements NestModule {
 		consumer
 			.apply(TokenMiddleware)
 			.forRoutes(TransactionHistoryController)
+	}
+
+	constructor() {
 	}
 }
